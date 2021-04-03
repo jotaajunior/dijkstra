@@ -26,32 +26,20 @@ function fileExists() {
 }
 
 /**
- * Verifica se o formato do arquivo é um "".json"
- */
-function fileExtensionIsValid() {
-  const fileExt = path.extname(filePath)
-
-  if (fileExt !== '.json') {
-    console.error(
-      [
-        'O formato do arquivo não é valido.',
-        `Esperado um arquivo com formato '.json', encontrado: '${fileExt}'.`,
-      ].join('\n')
-    )
-    process.exit(1)
-  }
-}
-
-/**
  * Realiza a leitura do arquivo
  */
 function getGraph() {
   try {
-    const fileContent = JSON.parse(
-      fs.readFileSync(path.resolve(filePath), 'utf-8')
-    )
+    const matrix = fs
+      .readFileSync(path.resolve(filePath), 'utf-8')
+      .split('\n')
+      .map((row) => {
+        return row
+          .split(' ')
+          .map((col) => (col === '#' ? Infinity : Number(col)))
+      })
 
-    return fileContent
+    return matrix
   } catch (error) {
     console.error(
       'O conteúdo do arquivo não é válido e não pôde ser lido. \n',
@@ -66,23 +54,22 @@ function getGraph() {
  */
 function main() {
   // Realiza validações
-  fileExtensionIsValid()
   fileExists()
 
   // Obtém o grafo
   const content = getGraph()
+  console.log({ content })
 
   try {
     const graph = new Dijkstra(content)
-
     const { distance, path } = graph.getResult()
 
     console.log("● Distância da 'partida' até 'chegada': ", distance, '\n')
     console.log('Caminho:')
 
     for (const node of path) {
-      const prefixSymbol = [START_KEY, FINISH_KEY].includes(node) ? '◊' : '●'
-      console.log(`  ${prefixSymbol} ${node.toUpperCase()}`)
+      const prefixSymbol = [0, content.length - 1].includes(node) ? '◊' : '●'
+      console.log(`  ${prefixSymbol} ${node}`)
     }
   } catch (error) {
     console.error(error)
