@@ -1,8 +1,8 @@
 import fs from 'fs'
 import path from 'path'
 
-import { FINISH_KEY, START_KEY } from './consts.js'
 import Dijkstra from './Dijkstra.js'
+import { toMatrix } from './utils/index.js'
 
 /**
  * O caminho para o arquivo das definições do Grafo
@@ -30,16 +30,9 @@ function fileExists() {
  */
 function getGraph() {
   try {
-    const matrix = fs
-      .readFileSync(path.resolve(filePath), 'utf-8')
-      .split('\n')
-      .map((row) => {
-        return row
-          .split(' ')
-          .map((col) => (col === '#' ? Infinity : Number(col)))
-      })
+    const fileContent = fs.readFileSync(path.resolve(filePath), 'utf-8')
 
-    return matrix
+    return toMatrix(fileContent)
   } catch (error) {
     console.error(
       'O conteúdo do arquivo não é válido e não pôde ser lido. \n',
@@ -58,13 +51,13 @@ function main() {
 
   // Obtém o grafo
   const content = getGraph()
-  console.log({ content })
 
   try {
-    const graph = new Dijkstra(content)
-    const { distance, path } = graph.getResult()
+    // Obtém a distância e o caminho
+    const { distance, path } = new Dijkstra(content).getResult()
 
-    console.log("● Distância da 'partida' até 'chegada': ", distance, '\n')
+    // Exibe o caminho
+    console.log('● Distância: ', distance, '\n')
     console.log('Caminho:')
 
     for (const node of path) {

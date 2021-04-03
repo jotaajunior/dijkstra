@@ -1,12 +1,13 @@
 /**
- * Retorna se a chave existe no objeto
+ * Converte o conteúdo do arquivo para uma matriz adjacente
  *
- * @param {Object} obj O objecto
- * @param {string} key A chave
- * @returns {boolean}
+ * @param {string} content O conteúdo
+ * @returns {array}
  */
-export function has(obj, key) {
-  return Object.prototype.hasOwnProperty.call(obj, key)
+export function toMatrix(content) {
+  return content.split('\n').map((row) => {
+    return row.split(' ').map((col) => (col === '#' ? Infinity : Number(col)))
+  })
 }
 
 /**
