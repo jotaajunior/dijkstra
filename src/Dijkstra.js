@@ -1,16 +1,26 @@
-import { has } from './utils/index.js'
-import { START_KEY, FINISH_KEY } from './consts.js'
+import { isAdjacent } from './utils/index.js'
 
 export default class Dijkstra {
   constructor(graph) {
-    // Custo dos nós
-    this.costs = {
-      [FINISH_KEY]: Infinity,
+    /**
+     * Primeiro, verifica se o existe um ponto de partida, caso
+     * não exista dispara um erro
+     */
+    if (isAdjacent(graph)) {
+      throw new Error(
+        [
+          'O formato do grafo não é válido.',
+          'A entrada deve ser uma matriz adjacente.',
+        ].join('\n')
+      )
     }
+
+    // Custo dos nós
+    this.costs = graph[0]
 
     // Nós pais
     this.parents = {
-      [FINISH_KEY]: null,
+      [graph.length - 1]: null,
     }
 
     // Nós já processados
@@ -19,25 +29,9 @@ export default class Dijkstra {
     // O próprio grafo
     this.graph = graph
 
-    /**
-     * Primeiro, verifica se o existe um ponto de partida, caso
-     * não exista dispara um erro
-     */
-    if (!has(graph, START_KEY)) {
-      throw new Error(
-        [
-          'O grafo não tem um ponto de partida.',
-          'Certifique-se que o grafo descrito no arquivo de entrada possui um ponto de partida.',
-        ].join('\n')
-      )
-    }
-
-    // Adiciona os nós filhos da partida ao custos
-    Object.assign(this.costs, graph[START_KEY])
-
     // Adiciona os nós filhos do ponto de chegada
-    for (const child in graph[START_KEY]) {
-      this.parents[child] = START_KEY
+    for (let i = 0; i < graph.length; ++i) {
+      this.parents[i] = 0
     }
   }
 
@@ -57,9 +51,6 @@ export default class Dijkstra {
    * @returns {string | null}
    */
   getCheapestNode() {
-    // Os nós atuais
-    const nodes = Object.keys(this.costs)
-
     // O nó mais barato
     let lowest = null
 
@@ -67,19 +58,16 @@ export default class Dijkstra {
      * Percorre os nós verificando se ele é menor que
      * 'lowest', ao encontrar substitui lowest pelo nó
      */
-    for (let i = 0; i < nodes.length; ++i) {
-      // O nó atual
-      const thisNode = nodes[i]
-
+    for (let i = 0; i < this.costs.length; ++i) {
       // O custo do nó atual
-      const thisCost = this.costs[thisNode]
+      const thisCost = this.costs[i]
 
       // O custo do menor nó
       const lowestCost = this.costs[lowest]
 
       if (lowest === null || thisCost < lowestCost) {
-        if (!this.wasProcessed(thisNode)) {
-          lowest = thisNode
+        if (!this.wasProcessed(i)) {
+          lowest = i
         }
       }
     }
@@ -94,16 +82,16 @@ export default class Dijkstra {
     // Obtém o nó mais barato
     let node = this.getCheapestNode()
 
-    while (node) {
+    while (node !== null) {
       // O custo do nó atual
       const cost = this.costs[node]
 
       // Filhos do nó atual
       const childrens = this.graph[node]
 
-      for (const children in childrens) {
+      for (let i = 0; i < childrens.length; ++i) {
         // O custo para ir até o filho
-        const childrenCost = childrens[children]
+        const childrenCost = childrens[i]
 
         // O novo custo calculado
         const newCost = cost + childrenCost
@@ -112,24 +100,15 @@ export default class Dijkstra {
          * Caso o custo para esse nó ainda não tenha sido calculado
          * adiciona-o
          */
-        if (!has(this.costs, children)) {
-          // Adiciona o novo custo calculado
-          this.costs[children] = newCost
-
-          // Registra o pai do nó
-          this.parents[children] = node
-        }
-
-        // O custo já calculado desse filho
-        const oldCost = this.costs[children]
+        const oldCost = this.costs[i]
 
         /**
          * Caso o custo do novo nó seja menor, o substitui
          * no registro de custos
          */
         if (newCost < oldCost) {
-          this.costs[children] = newCost
-          this.parents[children] = node
+          this.costs[i] = newCost
+          this.parents[i] = node
         }
       }
 
@@ -145,8 +124,8 @@ export default class Dijkstra {
    * Obtém o caminho ótimo para o destino
    */
   getOptimalPath() {
-    let optimalPath = [FINISH_KEY]
-    let parent = this.parents[FINISH_KEY]
+    let optimalPath = [this.graph.length - 1]
+    let parent = this.parents[this.graph.length - 1]
 
     while (parent) {
       // Adiciona o pai ao caminho ótimo
@@ -156,7 +135,7 @@ export default class Dijkstra {
       parent = this.parents[parent]
     }
 
-    return optimalPath
+    return [0, ...optimalPath]
   }
 
   /**
@@ -172,7 +151,7 @@ export default class Dijkstra {
     this.findPath()
 
     return {
-      distance: this.costs[FINISH_KEY],
+      distance: this.costs[this.graph.length - 1],
       path: this.getOptimalPath(),
     }
   }

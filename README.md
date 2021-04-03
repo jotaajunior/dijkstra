@@ -4,27 +4,14 @@ Implementação do [Algoritmo de Dijkstra](https://pt.wikipedia.org/wiki/Algorit
 
 ## Utilização
 
-### Definindo o grafo
+### Entrada
 
-- O nó de partida deve se chamar `partida`
-- O nó de chegada deve se chamar `chegada`
-- O arquivo deve estar no formato `.json`
+Esse algortimo toma como entrada uma [Matriz de Adjacência](https://en.wikipedia.org/wiki/Adjacency_matrix) armazenada num arquivo.
 
-A definição de um nó deve seguir o seguinte formato:
-
-```json
-{
-  "nó": {
-    "vizinho1": 8,
-    "vizinho2": 3
-  }
-}
-```
-
-Onde e `vizinho1` e `vizinho2` são nós de vizinho de `nó` com custo de `8` e `3` respectivamente.
+> Para representar o não relacionamento entre 2 nós utilize o caractere `#`
 
 ### Executando o algoritmo
 
 ```
-node src/index.js "caminho/até/o/arquivo.json"
+node src/index.js "caminho/até/o/arquivo.txt"
 ```

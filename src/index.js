@@ -1,8 +1,8 @@
 import fs from 'fs'
 import path from 'path'
 
-import { FINISH_KEY, START_KEY } from './consts.js'
 import Dijkstra from './Dijkstra.js'
+import { toMatrix } from './utils/index.js'
 
 /**
  * O caminho para o arquivo das definições do Grafo
@@ -26,32 +26,13 @@ function fileExists() {
 }
 
 /**
- * Verifica se o formato do arquivo é um "".json"
- */
-function fileExtensionIsValid() {
-  const fileExt = path.extname(filePath)
-
-  if (fileExt !== '.json') {
-    console.error(
-      [
-        'O formato do arquivo não é valido.',
-        `Esperado um arquivo com formato '.json', encontrado: '${fileExt}'.`,
-      ].join('\n')
-    )
-    process.exit(1)
-  }
-}
-
-/**
  * Realiza a leitura do arquivo
  */
 function getGraph() {
   try {
-    const fileContent = JSON.parse(
-      fs.readFileSync(path.resolve(filePath), 'utf-8')
-    )
+    const fileContent = fs.readFileSync(path.resolve(filePath), 'utf-8')
 
-    return fileContent
+    return toMatrix(fileContent)
   } catch (error) {
     console.error(
       'O conteúdo do arquivo não é válido e não pôde ser lido. \n',
@@ -66,23 +47,22 @@ function getGraph() {
  */
 function main() {
   // Realiza validações
-  fileExtensionIsValid()
   fileExists()
 
   // Obtém o grafo
   const content = getGraph()
 
   try {
-    const graph = new Dijkstra(content)
+    // Obtém a distância e o caminho
+    const { distance, path } = new Dijkstra(content).getResult()
 
-    const { distance, path } = graph.getResult()
-
-    console.log("● Distância da 'partida' até 'chegada': ", distance, '\n')
+    // Exibe o caminho
+    console.log('● Distância: ', distance, '\n')
     console.log('Caminho:')
 
     for (const node of path) {
-      const prefixSymbol = [START_KEY, FINISH_KEY].includes(node) ? '◊' : '●'
-      console.log(`  ${prefixSymbol} ${node.toUpperCase()}`)
+      const prefixSymbol = [0, content.length - 1].includes(node) ? '◊' : '●'
+      console.log(`  ${prefixSymbol} ${node}`)
     }
   } catch (error) {
     console.error(error)
