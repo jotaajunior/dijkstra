@@ -5,7 +5,7 @@
  * @returns {array}
  */
 export function toMatrix(content) {
-  return content.split('\n').map((row) => {
+  return content.map((row) => {
     return row.split(' ').map((col) => (col === '#' ? Infinity : Number(col)))
   })
 }

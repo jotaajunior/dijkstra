@@ -6,29 +6,33 @@ export default class Dijkstra {
      * Primeiro, verifica se o existe um ponto de partida, caso
      * não exista dispara um erro
      */
-    if (isAdjacent(graph)) {
+    if (isAdjacent(graph.content) && graph.length !== graph.size) {
       throw new Error(
         [
           'O formato do grafo não é válido.',
-          'A entrada deve ser uma matriz adjacente.',
+          'A entrada deve ser uma matriz de adjacência representando o grafo.',
         ].join('\n')
       )
     }
 
+    // Atributos do gráfico
+    this.start = graph.edges[0]
+    this.end = graph.edges[1]
+    this.size = graph.size
+
+    // O próprio grafo
+    this.graph = graph.content
+
     // Custo dos nós
-    this.costs = graph[0]
+    this.costs = this.graph[this.start]
 
     // Nós pais
     this.parents = {
-      [graph.length - 1]: null,
+      [this.end]: null,
     }
 
     // Nós já processados
     this.processed = []
-
-    // O próprio grafo
-    this.graph = graph
-
     // Adiciona os nós filhos do ponto de chegada
     for (let i = 0; i < graph.length; ++i) {
       this.parents[i] = 0
@@ -124,8 +128,8 @@ export default class Dijkstra {
    * Obtém o caminho ótimo para o destino
    */
   getOptimalPath() {
-    let optimalPath = [this.graph.length - 1]
-    let parent = this.parents[this.graph.length - 1]
+    let optimalPath = [this.end]
+    let parent = this.parents[this.end]
 
     while (parent) {
       // Adiciona o pai ao caminho ótimo
@@ -151,7 +155,7 @@ export default class Dijkstra {
     this.findPath()
 
     return {
-      distance: this.costs[this.graph.length - 1],
+      distance: this.costs[this.end],
       path: this.getOptimalPath(),
     }
   }

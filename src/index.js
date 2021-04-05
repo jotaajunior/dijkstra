@@ -30,9 +30,15 @@ function fileExists() {
  */
 function getGraph() {
   try {
-    const fileContent = fs.readFileSync(path.resolve(filePath), 'utf-8')
+    const [size, edges, ...graph] = fs
+      .readFileSync(path.resolve(filePath), 'utf-8')
+      .split('\n')
 
-    return toMatrix(fileContent)
+    return {
+      size,
+      edges: edges.split(' ').map((edge) => Number(edge)),
+      content: toMatrix(graph),
+    }
   } catch (error) {
     console.error(
       'O conteúdo do arquivo não é válido e não pôde ser lido. \n',
@@ -50,18 +56,18 @@ function main() {
   fileExists()
 
   // Obtém o grafo
-  const content = getGraph()
+  const graph = getGraph()
 
   try {
     // Obtém a distância e o caminho
-    const { distance, path } = new Dijkstra(content).getResult()
+    const { distance, path } = new Dijkstra(graph).getResult()
 
     // Exibe o caminho
     console.log('● Distância: ', distance, '\n')
     console.log('Caminho:')
 
     for (const node of path) {
-      const prefixSymbol = [0, content.length - 1].includes(node) ? '◊' : '●'
+      const prefixSymbol = [0, graph.size - 1].includes(node) ? '◊' : '●'
       console.log(`  ${prefixSymbol} ${node}`)
     }
   } catch (error) {
